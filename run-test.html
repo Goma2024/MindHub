@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>测试本地存储</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+        }
+        .section {
+            margin-bottom: 20px;
+        }
+        h2 {
+            color: #555;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        pre {
+            background-color: #f9f9f9;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-family: 'Courier New', Courier, monospace;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .error {
+            color: red;
+        }
+        button {
+            margin: 5px;
+            padding: 8px 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>测试本地存储</h1>
+        
+        <div class="section">
+            <h2>测试结果</h2>
+            <pre id="testResults">点击下方按钮开始测试...</pre>
+        </div>
+        
+        <div class="section">
+            <h2>操作</h2>
+            <button onclick="runTest()">运行测试</button>
+            <button onclick="clearLocalStorage()">清除本地存储</button>
+            <button onclick="loadData()">查看当前数据</button>
+        </div>
+    </div>
+    
+    <script>
+        function runTest() {
+            const resultsElement = document.getElementById('testResults');
+            let results = '=== 测试本地存储中的用户数据 ===\n';
+            
+            // 检查本地存储中的appState
+            const appState = localStorage.getItem('appState');
+            results += '1. 本地存储中是否存在appState: ' + !!appState + '\n';
+            
+            if (appState) {
+                try {
+                    const parsedState = JSON.parse(appState);
+                    results += '2. 解析appState成功\n';
+                    results += '3. 用户数量: ' + (parsedState.users ? parsedState.users.length : 0) + '\n';
+                    
+                    if (parsedState.users && parsedState.users.length > 0) {
+                        results += '4. 用户列表:\n';
+                        parsedState.users.forEach((user, index) => {
+                            results += `   ${index + 1}. 邮箱: ${user.email}, 用户名: ${user.name}, 注册时间: ${user.createdAt}\n`;
+                        });
+                    } else {
+                        results += '4. 没有找到用户数据\n';
+                    }
+                } catch (error) {
+                    results += '2. 解析appState失败: ' + error.message + '\n';
+                }
+            } else {
+                results += '2. 本地存储中没有appState数据\n';
+            }
+            
+            // 测试添加用户
+            results += '\n=== 测试添加用户 ===\n';
+            const testUser = {
+                id: `user-${Date.now()}`,
+                email: `test${Date.now()}@example.com`,
+                password: '123456',
+                name: '测试用户',
+                avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=test${Date.now()}`,
+                createdAt: new Date(),
+                subscription: 'free'
+            };
+            
+            // 如果appState存在，添加用户；否则创建新的appState
+            if (appState) {
+                try {
+                    const parsedState = JSON.parse(appState);
+                    const updatedUsers = parsedState.users ? [...parsedState.users, testUser] : [testUser];
+                    const updatedState = {
+                        ...parsedState,
+                        users: updatedUsers
+                    };
+                    localStorage.setItem('appState', JSON.stringify(updatedState));
+                    results += '5. 添加测试用户成功\n';
+                    results += '6. 新用户邮箱: ' + testUser.email + '\n';
+                    results += '7. 新用户密码: ' + testUser.password + '\n';
+                } catch (error) {
+                    results += '5. 添加测试用户失败: ' + error.message + '\n';
+                }
+            } else {
+                // 创建新的appState
+                const newState = {
+                    user: null,
+                    users: [testUser],
+                    knowledgeItems: [],
+                    importRecords: [],
+                    searchRecords: [],
+                    isLoading: false,
+                    darkMode: false,
+                    categories: ['工作方法', '技术', '自我提升', '学习笔记'],
+                    tags: ['时间管理', '效率', 'React', '前端', '阅读', '学习']
+                };
+                localStorage.setItem('appState', JSON.stringify(newState));
+                results += '5. 创建新的appState并添加测试用户成功\n';
+                results += '6. 新用户邮箱: ' + testUser.email + '\n';
+                results += '7. 新用户密码: ' + testUser.password + '\n';
+            }
+            
+            // 再次检查用户数据
+            results += '\n=== 再次检查用户数据 ===\n';
+            const updatedAppState = localStorage.getItem('appState');
+            if (updatedAppState) {
+                try {
+                    const parsedState = JSON.parse(updatedAppState);
+                    results += '8. 更新后的用户数量: ' + (parsedState.users ? parsedState.users.length : 0) + '\n';
+                    if (parsedState.users && parsedState.users.length > 0) {
+                        results += '9. 最新的用户:\n';
+                        const lastUser = parsedState.users[parsedState.users.length - 1];
+                        results += `   邮箱: ${lastUser.email}, 用户名: ${lastUser.name}, 注册时间: ${lastUser.createdAt}\n`;
+                    }
+                } catch (error) {
+                    results += '8. 解析更新后的appState失败: ' + error.message + '\n';
+                }
+            }
+            
+            results += '\n=== 测试完成 ===\n';
+            results += '请在浏览器中打开应用，使用新创建的测试用户登录，然后重新启动开发服务器测试持久化功能。';
+            
+            resultsElement.textContent = results;
+        }
+        
+        function clearLocalStorage() {
+            if (confirm('确定要清除所有本地存储数据吗？')) {
+                localStorage.clear();
+                document.getElementById('testResults').textContent = '本地存储已清除';
+            }
+        }
+        
+        function loadData() {
+            const resultsElement = document.getElementById('testResults');
+            let results = '=== 当前本地存储数据 ===\n';
+            
+            const appState = localStorage.getItem('appState');
+            if (appState) {
+                results += 'appState数据:\n';
+                results += appState;
+            } else {
+                results += '本地存储中没有appState数据';
+            }
+            
+            resultsElement.textContent = results;
+        }
+    </script>
+</body>
+</html>

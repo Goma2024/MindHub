@@ -1,6 +1,8 @@
 智汇库 - AI学习助手
 ===================
 
+图文效果展示可见链接：https://wcno336ps4a1.feishu.cn/docx/OFxNdIo6aoaIIYxupTtcboponHd?from=from_copylink
+
 项目简介
 -------
 智汇库是一个基于AI的智能学习助手，帮助用户把"收藏"变成"学会"。通过AI一键总结、智能问答、知识卡片生成等功能，让用户高效消化和内化收藏的知识内容。
